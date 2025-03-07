@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
+import 'forgot_password.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -15,6 +17,28 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  // In _handleGoogleSignIn() method
+  void _handleGoogleSignIn() async {
+    try {
+      await GoogleSignIn().signOut();
+      await AuthService.signInWithGoogle();
+    } catch (e) {
+      String errorMessage = 'Sign-in failed';
+
+      if (e.toString().contains('12500')) {
+        errorMessage = 'Google Play Services error';
+      } else if (e.toString().contains('12501')) {
+        errorMessage = 'Sign-in canceled';
+      } else if (e.toString().contains('10')) {
+        errorMessage = 'Network error';
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+    }
+  }
+
   void _submitLoginForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -22,8 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await AuthService.signIn(
-        email: _emailController.text, // Named parameter
-        password: _passwordController.text, // Named parameter
+        email: _emailController.text,
+        password: _passwordController.text,
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
@@ -124,13 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     SizedBox(height: 24),
                     _isLoading
-                        ? Center(
-                          child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
+                        ? Center(child: CircularProgressIndicator())
                         : ElevatedButton(
                           onPressed: _submitLoginForm,
                           style: ElevatedButton.styleFrom(
@@ -142,21 +160,88 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Text('Login', style: TextStyle(fontSize: 16)),
                         ),
-                    SizedBox(height: 16),
+                    SizedBox(height: 12),
                     TextButton(
                       onPressed:
                           () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => RegisterScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => ForgotPasswordScreen(),
+                            ),
                           ),
                       child: Text(
-                        'Create new account',
+                        'Forgot Password?',
                         style: TextStyle(
                           color: Colors.blueAccent,
                           fontSize: 14,
                         ),
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.end,
                       ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(thickness: 1, color: Colors.grey[300]),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(thickness: 1, color: Colors.grey[300]),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: _handleGoogleSignIn,
+                      icon: Image.asset('assets/google_logo.png', width: 24),
+                      label: Text('Continue with Google'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account?",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        TextButton(
+                          onPressed:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RegisterScreen(),
+                                ),
+                              ),
+                          child: Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -63,7 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '410734864634',
     projectId: 'shop-management-25c23',
     storageBucket: 'shop-management-25c23.firebasestorage.app',
+    androidClientId: '410734864634-8s1eptjplc3ud1trcmf5k39d8lfadlub.apps.googleusercontent.com',
     iosClientId: '410734864634-ip3oinnumdbbdq074mdh25r4d6qlneuc.apps.googleusercontent.com',
     iosBundleId: 'com.example.authentication',
   );
+
 }
